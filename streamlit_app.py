@@ -4,6 +4,28 @@ import pandas as pd
 from streamlit_folium import st_folium
 import random
 from datetime import datetime
+# Количество новых строк, которые нужно добавить
+num_new_rows = 1000  # Добавим 1000 новых автобусов
+
+# Функция для генерации случайных данных
+def generate_random_data():
+    bus_id = random.randint(1000, 9999)  # случайный ID автобуса
+    current_lat = random.uniform(38.5800, 38.6000)  # случайная широта
+    current_lon = random.uniform(68.7800, 68.8200)  # случайная долгота
+    next_stop = random.choice(['Stop 1', 'Stop 2', 'Stop 3', 'Stop 4'])  # случайная остановка
+    time_to_next_stop = random.randint(5, 20)  # случайное время до следующей остановки
+    return [bus_id, current_lat, current_lon, next_stop, time_to_next_stop]
+
+# Генерация новых данных
+new_rows = [generate_random_data() for _ in range(num_new_rows)]
+
+# Создание нового DataFrame
+new_data = pd.DataFrame(new_rows, columns=['bus_id', 'current_lat', 'current_lon', 'next_stop', 'time_to_next_stop'])
+
+# Сохранение данных в CSV файл
+new_data.to_csv('bus_data.csv', index=False)
+
+print("Данные успешно сгенерированы и сохранены в bus_data.csv")
 
 # Загрузка данных
 @st.cache_data
