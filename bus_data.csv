@@ -1,0 +1,6 @@
+bus_id,current_lat,current_lon,next_stop,time_to_next_stop
+1,38.5820,68.7866,Stop 2,10
+2,38.5865,68.7945,Stop 3,12
+3,38.5900,68.8000,Stop 1,8
+4,38.5950,68.8050,Stop 4,15
+5,38.5980,68.8100,Stop 2,6
