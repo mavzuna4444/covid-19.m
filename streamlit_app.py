@@ -35,10 +35,6 @@ bus_data = pd.DataFrame(new_rows, columns=['bus_id', 'current_lat', 'current_lon
 # Сохранение данных в CSV файл
 bus_data.to_csv('bus_data.csv', index=False)
 
-# Загрузка данных с кешированием
-@st.cache_data
-def load_data():
-    return pd.read_csv('bus_data.csv')
 
 # Функция для отображения карты с автобусами и остановками
 def show_map(bus_data, user_location=None):
