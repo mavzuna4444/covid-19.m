@@ -9,7 +9,7 @@ from datetime import datetime
 @st.cache
 def load_data():
     # Загрузка данных из CSV
-    return pd.read_csv('data/bus_data.csv')
+    return pd.read_csv('bus_data.csv')
 
 # Отображение карты с автобусами
 def show_map(bus_data):
