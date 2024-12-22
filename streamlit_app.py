@@ -6,9 +6,9 @@ import random
 from datetime import datetime
 
 # Загрузка данных
-@st.cache
+@st.cache_data
 def load_data():
-    # Загрузка данных из CSV
+    # Убедитесь, что файл в корневой папке проекта
     return pd.read_csv('bus_data.csv')
 
 # Отображение карты с автобусами
