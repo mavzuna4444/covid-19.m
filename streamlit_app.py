@@ -2,10 +2,10 @@ import streamlit as st
 import folium
 import pandas as pd
 import random
-from datetime import datetime
 from streamlit_folium import st_folium
+import geopy.distance
 
-# Генерация случайных данных для автобусов
+# Больше остановок для маршрутов
 stops = [
     "Улица Ленина", "Центральный рынок", "Площадь Республики", "ЖД Вокзал", "Университет",
     "Торговый центр", "Бульвар Мира", "Площадь Победы", "Мост через реку", "Автовокзал",
@@ -34,13 +34,13 @@ bus_data = pd.DataFrame(new_rows, columns=['bus_id', 'current_lat', 'current_lon
 # Сохранение данных в CSV файл
 bus_data.to_csv('bus_data.csv', index=False)
 
-# Загрузка данных
+# Загрузка данных с кешированием
 @st.cache_data
 def load_data():
     return pd.read_csv('bus_data.csv')
 
 # Функция для отображения карты с автобусами и остановками
-def show_map(bus_data):
+def show_map(bus_data, user_location=None):
     # Центр карты (примерный центр города Душанбе)
     map_center = [38.5833, 68.7869]
     bus_map = folium.Map(location=map_center, zoom_start=14)
@@ -53,14 +53,22 @@ def show_map(bus_data):
             icon=folium.Icon(color='blue', icon='cloud')
         ).add_to(bus_map)
 
+    # Фильтрация автобусов, если указано местоположение пользователя
+    if user_location:
+        nearby_buses = bus_data[
+            bus_data.apply(lambda row: geopy.distance.distance((user_location[0], user_location[1]), (row['current_lat'], row['current_lon'])).km < 1, axis=1)
+        ]
+    else:
+        nearby_buses = bus_data
+
     # Добавление автобусов на карту
-    for _, bus in bus_data.iterrows():
+    for _, bus in nearby_buses.iterrows():
         folium.Marker(
             location=[bus['current_lat'], bus['current_lon']],
             popup=f"Bus {bus['bus_id']} | Next stop: {bus['next_stop']} | Time to next stop: {bus['time_to_next_stop']} minutes",
             icon=folium.Icon(color='red', icon='info-sign')
         ).add_to(bus_map)
-    
+
     return bus_map
 
 # Заголовок и описание
@@ -102,8 +110,11 @@ else:
 # Загрузка данных
 bus_data = load_data()
 
+# Местоположение пользователя для фильтрации ближайших автобусов (например, можно взять данные о местоположении пользователя)
+user_location = [38.5840, 68.7900]  # Примерная позиция пользователя
+
 # Отображение карты с автобусами
-bus_map = show_map(bus_data)
+bus_map = show_map(bus_data, user_location=user_location)
 
 # Отображение карты в Streamlit
 st_folium(bus_map, width=700)
@@ -114,5 +125,5 @@ if st.button('Обновить данные'):
     bus_data['current_lat'] = bus_data['current_lat'] + random.uniform(-0.001, 0.001)
     bus_data['current_lon'] = bus_data['current_lon'] + random.uniform(-0.001, 0.001)
     st.write("Данные обновлены!")
-    bus_map = show_map(bus_data)
+    bus_map = show_map(bus_data, user_location=user_location)
     st_folium(bus_map, width=700)
