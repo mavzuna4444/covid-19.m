@@ -4,15 +4,16 @@ import pandas as pd
 import random
 from streamlit_folium import st_folium
 import geopy.distance
+import datetime
 
-# Больше остановок для маршрутов
+# Остановки вдоль дорог
 stops = [
-    "Улица Ленина", "Центральный рынок", "Площадь Республики", "ЖД Вокзал", "Университет",
-    "Торговый центр", "Бульвар Мира", "Площадь Победы", "Мост через реку", "Автовокзал",
-    "Государственная библиотека", "Ботанический сад", "Парк культуры", "Рынок Баракат",
-    "Дворец спорта", "Музей истории", "Магазин электроники", "Стадион", "Сельский рынок",
-    "Кинотеатр", "Школа №3", "Гимназия", "Фитнес клуб", "Зоопарк", "Государственная больница",
-    "Магазин Окей", "Супермаркет Ашан", "Гармония", "Кафе \"Березка\""
+    "Улица Ленина", "Центральный рынок", "Площадь Республики", "ЖД Вокзал",
+    "Университет", "Торговый центр", "Бульвар Мира", "Площадь Победы", "Мост через реку",
+    "Автовокзал", "Государственная библиотека", "Ботанический сад", "Парк культуры",
+    "Рынок Баракат", "Дворец спорта", "Музей истории", "Магазин электроники", "Стадион",
+    "Сельский рынок", "Кинотеатр", "Школа №3", "Гимназия", "Фитнес клуб", "Зоопарк",
+    "Государственная больница", "Магазин Окей", "Супермаркет Ашан", "Гармония", "Кафе 'Березка'"
 ]
 
 # Количество новых строк для генерации
@@ -47,25 +48,30 @@ def show_map(bus_data, user_location=None):
 
     # Добавление остановок на карту
     for stop in stops:
+        stop_lat = random.uniform(38.5800, 38.6000)  # Генерация случайной широты
+        stop_lon = random.uniform(68.7800, 68.8200)  # Генерация случайной долготы
         folium.Marker(
-            location=[random.uniform(38.5800, 38.6000), random.uniform(68.7800, 68.8200)],
+            location=[stop_lat, stop_lon],
             popup=f'{stop}',
             icon=folium.Icon(color='blue', icon='cloud')
         ).add_to(bus_map)
 
     # Фильтрация автобусов, если указано местоположение пользователя
     if user_location:
-        nearby_buses = bus_data[
-            bus_data.apply(lambda row: geopy.distance.distance((user_location[0], user_location[1]), (row['current_lat'], row['current_lon'])).km < 1, axis=1)
-        ]
+        nearby_buses = bus_data[bus_data.apply(
+            lambda row: geopy.distance.distance(
+                (user_location[0], user_location[1]), (row['current_lat'], row['current_lon'])
+            ).km < 1, axis=1
+        )]
     else:
         nearby_buses = bus_data
 
     # Добавление автобусов на карту
     for _, bus in nearby_buses.iterrows():
+        arrival_time = datetime.datetime.now() + datetime.timedelta(minutes=bus['time_to_next_stop'])
         folium.Marker(
             location=[bus['current_lat'], bus['current_lon']],
-            popup=f"Bus {bus['bus_id']} | Next stop: {bus['next_stop']} | Time to next stop: {bus['time_to_next_stop']} minutes",
+            popup=f"Bus {bus['bus_id']} | Next stop: {bus['next_stop']} | Time to next stop: {bus['time_to_next_stop']} minutes | Estimated arrival: {arrival_time.strftime('%H:%M:%S')}",
             icon=folium.Icon(color='red', icon='info-sign')
         ).add_to(bus_map)
 
