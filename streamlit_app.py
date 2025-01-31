@@ -109,10 +109,3 @@ bus_map = show_map(bus_data)
 st_folium(bus_map, width=700)
 
 # Опционально: кнопка для обновления данных
-if st.button('Обновить данные'):
-    # Симуляция обновления данных (в реальном проекте можно получать данные через API)
-    bus_data['current_lat'] = bus_data['current_lat'] + random.uniform(-0.001, 0.001)
-    bus_data['current_lon'] = bus_data['current_lon'] + random.uniform(-0.001, 0.001)
-    st.write("Данные обновлены!")
-    bus_map = show_map(bus_data)
-    st_folium(bus_map, width=700)
